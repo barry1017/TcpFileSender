@@ -61,7 +61,17 @@ void TcpFileSender::startTransfer(){
     outBlock.resize(0);
 }
 void TcpFileSender::updateClientProgress(qint64 numBytes){
-
+    bytesWritten+=(int) numBytes;
+    if(bytesToWrite >0){
+        outBlock=localFile->read(qMin(bytesToWrite,loadSize));
+        bytesToWrite-=(int)tcpClient.write(outBlock);
+        outBlock.resize(0);
+    }else{
+        localFile->close();
+    }
+    clientProgressBar->setMaximum(totalBytes);
+    clientProgressBar->setValue(bytesWritten);
+    clientStatusLabel->setText(tr("已傳送 %l Bytes").arg(bytesWritten));
 }
 void TcpFileSender::openFile(){
     fileName=QFileDialog::getOpenFileName(this);
